@@ -174,9 +174,13 @@ wss.on('connection', function (ws, request) {
     onlineUsers[request.session.user_id] = ws;
 
     ws.on('message', function (message) {
-        console.log(message)
         try {
             var data = JSON.parse(message);
+            // wss.clients.forEach(function each(client) {
+            //     if (client.readyState === WebSocket.OPEN) {
+            //         client.send(JSON.stringify({ data: data, status: 1 }));
+            //     }
+            // });
         } catch (error) {
             return;
         }
@@ -207,11 +211,11 @@ function sendMessages(request, response) {
                         .then((mes) => 
                         {
                             if (user.user_id in onlineUsers) {
-                                onlineUsers[mes.message_to_user_id].send( `From ${request.session.user_id}: ${message_text}` );
+                                onlineUsers[mes.message_to_user_id].send(JSON.stringify({ data: message_text, status: 1 }));
                             }
                             if (mes.message_from_user_id !== mes.message_to_user_id) {
                                 if (mes.message_from_user_id in onlineUsers) {
-                                    onlineUsers[mes.message_from_user_id].send( `To ${mes.message_to_user_id}: ${message_text}` );
+                                    onlineUsers[mes.message_from_user_id].send(JSON.stringify({ data: message_text, status: 1 }));
                                 }
                             }
 
@@ -240,8 +244,7 @@ async function getMessages(request, response) {
 		}})
 	
 	response.send({
-		received: received_messages,
-		sent: sent_messages
+		data: received_messages.concat(sent_messages),
 	})
 }
 

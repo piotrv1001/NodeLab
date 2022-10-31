@@ -32,7 +32,6 @@ wss.on('connection', function (ws, request) {
     onlineUsers[request.session.user_id] = ws;
 
     ws.on('message', function (message) {
-        console.log(message)
         try {
             var data = JSON.parse(message);
         } catch (error) {
