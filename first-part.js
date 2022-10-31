@@ -1,7 +1,7 @@
 var express         = require('express');
 const Sequelize = require('sequelize')
 const cors = require('cors');
-var session = require('express-session')
+var session = require('express-session');
 var app             = express();
 var PORT            = process.env.PORT || 8080;
 var server          = app.listen(PORT,() => console.log(`Listening on ${ PORT }`));
@@ -12,7 +12,7 @@ const sequelize = new Sequelize('database', 'root', 'root', {
 });
 
 const sessionParser = session({
-    saveUninitialized: false,
+    saveUninitialized: true,
     secret: '$secret',
     resave: false
 });
@@ -20,7 +20,6 @@ const sessionParser = session({
 app.use(express.json());
 app.use(cors());
 app.use(sessionParser);
-
 
 const User = sequelize.define('user', {
     user_id: {
@@ -64,24 +63,24 @@ function register(request, response) {
 }
 
 function login(request, response) {
-    console.log(request.body)
+    console.log(request.body);
     var user_name = request.body.user_name;
     var user_password = request.body.user_password;
     if (user_name && user_password) {
-        User.findOne({ where: { user_name: user_name, user_password: user_password } }).then(
+        User.findOne({ where: { user_name: user_name, user_password: user_password } } ).then(
             user => {
-                if(user === null) {
-                    request.session.loggedin = false;
+                if(user === null || user === undefined) {
+                    response.send({ loggedin: false });
                 } else {
                     request.session.loggedin = true;
                     request.session.user_id = user.user_id;
+                    response.send({ loggedin: true });
                 }
             }
         )
     } else {
-        request.session.loggedin = false;
+        response.send({ loggedin: false });
     }
-    response.send({ loggedin: request.session.loggedin });
 }
 
 function loginTest(request, response) {
@@ -89,7 +88,7 @@ function loginTest(request, response) {
 }
 
 function logout(request, response) {
-    // TODO: 
+    request.session.destroy()
     response.send({ loggedin: false });
 }
 
@@ -102,8 +101,11 @@ function checkSessions(request, response, next) {
 }
 
 function getUsers(request, response) {
-    //TODO: 
-    response.send({ data: [] });
+    User.findAll().then(
+        users => {
+            response.send({ data: users });
+        }
+    )
 }
 
 app.get('/api/test-get', testGet);
