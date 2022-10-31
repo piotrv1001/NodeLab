@@ -2,10 +2,8 @@
   const messages = document.querySelector('#messages');
   const wsButton = document.querySelector('#wsButton');
   const wsSendButton = document.querySelector('#wsSendButton');
-  const wsButtonClose = document.querySelector('#wsButtonClose');
   const logout = document.querySelector('#logout');
   const login = document.querySelector('#login');
-  const getUsers = document.querySelector('#getUsers');
 
   const input_login = document.getElementById("input_login");
   const input_password = document.getElementById("input_password");
@@ -37,15 +35,6 @@
 
   logout.onclick = function() {
     fetch('/api/logout', { method: 'GET', credentials: 'same-origin' })
-      .then(handleResponse)
-      .then(showMessage)
-      .catch(function(err) {
-        showMessage(err.message);
-      });
-  };
-
-  getUsers.onClick = function() {
-    fetch('/api/users', { method: 'GET', credentials: 'same-origin'})
       .then(handleResponse)
       .then(showMessage)
       .catch(function(err) {
@@ -87,11 +76,4 @@
     showMessage('Sent "Hello World!"');
   };
 
-  wsButtonClose.onClick = function() {
-    if (!ws) {
-      showMessage('No WebSocket connection');
-      return;
-    }
-    ws.close();
-  }
 })();
