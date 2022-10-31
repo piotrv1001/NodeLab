@@ -35,5 +35,10 @@ function sendMessages(request, response) {
         })
 }
 
+function getMessages(request, response) {
 
+}
+
+
+app.get('/api/messages/:id', [checkSessions, getMessages]);
 app.post('/api/messages/', [checkSessions, sendMessages]);

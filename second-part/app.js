@@ -2,6 +2,7 @@
   const messages = document.querySelector('#messages');
   const wsButton = document.querySelector('#wsButton');
   const wsSendButton = document.querySelector('#wsSendButton');
+  const wsButtonClose = document.querySelector('#wsButtonClose');
   const logout = document.querySelector('#logout');
   const login = document.querySelector('#login');
   const getUsers = document.querySelector('#getUsers');
@@ -43,6 +44,15 @@
       });
   };
 
+  getUsers.onClick = function() {
+    fetch('/api/users', { method: 'GET', credentials: 'same-origin'})
+      .then(handleResponse)
+      .then(showMessage)
+      .catch(function(err) {
+        showMessage(err.message);
+      });
+  };
+
   let ws;
 
   wsButton.onclick = function() {
@@ -76,4 +86,12 @@
     ws.send('Hello World!');
     showMessage('Sent "Hello World!"');
   };
+
+  wsButtonClose.onClick = function() {
+    if (!ws) {
+      showMessage('No WebSocket connection');
+      return;
+    }
+    ws.close();
+  }
 })();
