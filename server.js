@@ -188,16 +188,64 @@ wss.on('connection', function (ws, request) {
 
 });
 
+// PART 3
+function sendMessages(request, response) {
+    var message_text = request.body.message_text;
+    var to = request.body.message_to_user_id;
+    console.log(`Received message => ${message_text} from ${request.session.user_id} to ${to}`);
+
+    User.findAll({ where: { user_id: to } }).then(
+        users => {
+            if (users.length >= 1) {
+                var mes = {
+                    message_from_user_id: request.session.user_id,
+                    message_to_user_id: users[0].user_id,
+                    message_text: message_text,
+                }
+                var user = users[0];
+                Message.create(mes)
+                        .then((mes) => 
+                        {
+                            if (user.user_id in onlineUsers) {
+                                onlineUsers[mes.message_to_user_id].send( `From ${request.session.user_id}: ${message_text}` );
+                            }
+                            if (mes.message_from_user_id !== mes.message_to_user_id) {
+                                if (mes.message_from_user_id in onlineUsers) {
+                                    onlineUsers[mes.message_from_user_id].send( `To ${mes.message_to_user_id}: ${message_text}` );
+                                }
+                            }
+
+                            response.send({ sending: true })
+                        })
+                        .catch(function (err) { console.log(err); response.send({ error: err })
+                      });
+
+            } else {
+                response.send({ error: "User not exists" });
+            }
+        })
+}
+
+async function getMessages(request, response) {
+	const sent_messages = await Message.findAll({
+		where: {
+		message_from_user_id: request.session.user_id,
+		message_to_user_id: request.params.id
+		}})
+		
+	const received_messages = await Message.findAll({
+		where: {
+		message_from_user_id: request.params.id,
+		message_to_user_id: request.session.user_id
+		}})
+	
+	response.send({
+		received: received_messages,
+		sent: sent_messages
+	})
+}
 
 
-// In the user retrieval function, it is worth using the code provided to map 
-// database objects to JSON objects
-//users = users.map(user => {
-//        return user.toJSON();
-//});
-            
-// Going through the objects in the list of objects and adding an appropriate field to them
-//for (user of users) {
-//    user.online = true;
-//}
+app.get('/api/messages/:id', [checkSessions, getMessages]);
+app.post('/api/messages/', [checkSessions, sendMessages]);
 
