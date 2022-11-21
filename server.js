@@ -1,4 +1,5 @@
 // PART 1
+// test commit
 var express         = require('express');
 const Sequelize = require('sequelize')
 const cors = require('cors');
