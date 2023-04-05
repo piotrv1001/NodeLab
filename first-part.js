@@ -5,6 +5,7 @@ var session = require('express-session');
 var app             = express();
 var PORT            = process.env.PORT || 8080;
 var server          = app.listen(PORT,() => console.log(`Listening on ${ PORT }`));
+// test commit
 
 const sequelize = new Sequelize('database', 'root', 'root', {
     dialect: 'sqlite',
